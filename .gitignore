@@ -1,0 +1,26 @@
+# Build output
+bin/
+obj/
+publish/
+[Pp]ublish/
+
+# IDE
+.vs/
+.idea/
+*.user
+*.suo
+*.userprefs
+*.cache
+*.swp
+
+# Logs / runtime
+*.log
+debug.log
+
+# OS
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# Single-file publish artifacts
+*.exe.manifest

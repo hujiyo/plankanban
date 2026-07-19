@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>PlanKanban</AssemblyName>
+    <RootNamespace>PlanKanban</RootNamespace>
+    <Version>1.0.0</Version>
+    <Company>PlanKanban</Company>
+    <Product>Plan Kanban</Product>
+    <AssemblyTitle>Plan Kanban</AssemblyTitle>
+    <Description>极简边缘呼出式计划看板</Description>
+
+    <!-- 单文件 + 自包含发布，免安装 -->
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+
+    <!-- 体积优化 -->
+    <DebugType>embedded</DebugType>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <TrimUnusedComponents>false</TrimUnusedComponents>
+    <EventSourceSupport>false</EventSourceSupport>
+    <HttpActivityPropagationSupport>false</HttpActivityPropagationSupport>
+    <MetricsSupport>false</MetricsSupport>
+    <UseSystemResourceKeys>true</UseSystemResourceKeys>
+
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- WPF + WinForms 共存时移除 System.Windows.Forms 隐式全局 using，
+         避免与 System.Windows.Input.* 同名类型冲突；改用 Forms = System.Windows.Forms; 显式别名 -->
+    <Using Remove="System.Windows.Forms" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="build.ps1" Pack="false" CopyToOutputDirectory="Never" />
+  </ItemGroup>
+
+</Project>

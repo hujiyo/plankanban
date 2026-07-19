@@ -1,0 +1,45 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- 深色 -->
+
+    <Color x:Key="AccentColor">#5C8CFF</Color>
+    <Color x:Key="AccentGradientEndColor">#7AA0FF</Color>
+    <Color x:Key="CurrentCardBgColor">#243049</Color>
+    <Color x:Key="PanelInnerBgColor">#1C2029</Color>
+
+    <SolidColorBrush x:Key="PanelBackground" Color="#1C2029" Opacity="0.94"/>
+    <SolidColorBrush x:Key="PanelBorder" Color="#2B3242"/>
+    <SolidColorBrush x:Key="PanelInnerBg" Color="#1C2029"/>
+
+    <SolidColorBrush x:Key="TextPrimaryBrush"   Color="#EDF1F9"/>
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#9AA3B5"/>
+    <SolidColorBrush x:Key="TextTertiaryBrush"  Color="#5F6878"/>
+    <SolidColorBrush x:Key="TextOnAccentBrush"  Color="#FFFFFF"/>
+
+    <SolidColorBrush x:Key="AccentBrush"      Color="#5C8CFF"/>
+    <SolidColorBrush x:Key="AccentSoftBrush"  Color="#2A3A60"/>
+    <SolidColorBrush x:Key="AccentGradientEnd" Color="#7AA0FF"/>
+
+    <SolidColorBrush x:Key="DangerBrush"     Color="#F06868"/>
+    <SolidColorBrush x:Key="DangerSoftBrush" Color="#3B2326"/>
+    <SolidColorBrush x:Key="DoneBrush"       Color="#5F6878"/>
+
+    <SolidColorBrush x:Key="TriggerBarBrush"     Color="#3A4252"/>
+    <SolidColorBrush x:Key="TriggerBarHotBrush"  Color="#5C8CFF"/>
+    <SolidColorBrush x:Key="CurrentCardBg"        Color="#243049"/>
+    <SolidColorBrush x:Key="CurrentCardBorder"   Color="#5C8CFF"/>
+    <SolidColorBrush x:Key="CurrentCardBgEnd"   Color="#1C2029"/>
+
+    <SolidColorBrush x:Key="ItemHoverBrush"   Color="#262D3A"/>
+    <SolidColorBrush x:Key="ItemActiveBrush"  Color="#2E3A55"/>
+
+    <SolidColorBrush x:Key="InputBackground" Color="#222936"/>
+    <SolidColorBrush x:Key="InputBorder"    Color="#303948"/>
+    <SolidColorBrush x:Key="InputFocusGlow" Color="#5C8CFF"/>
+
+    <SolidColorBrush x:Key="DividerBrush"   Color="#2A313F"/>
+    <SolidColorBrush x:Key="TopbarBg"        Color="#1A1E27"/>
+
+    <SolidColorBrush x:Key="WindowDim" Color="#000000" Opacity="0.0"/>
+</ResourceDictionary>
