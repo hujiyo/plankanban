@@ -3,6 +3,7 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Text;
 using System.Runtime.InteropServices;
 using System.Windows;
+using Microsoft.Win32;
 using Forms = System.Windows.Forms;
 using PlanKanban.Models;
 using PlanKanban.Services;
@@ -53,6 +54,27 @@ public partial class App : Application
         _saver = new DebouncedSaver(_store);
 
         _vm = new MainViewModel(_data, _saver);
+
+        // 开机自启路径自愈：设置已开启但注册表记录的旧路径已失效（exe 被移动），
+        // 纠正为当前 exe 路径，保证登录时仍能拉起。
+        if (_data.Settings.AutoStart)
+        {
+            try
+            {
+                var current = Environment.ProcessPath;
+                if (!string.IsNullOrEmpty(current))
+                {
+                    using var key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", writable: false);
+                    var existing = (key?.GetValue(AutoStartService.ValueName) as string)?.Trim('"');
+                    if (!string.Equals(existing, current, StringComparison.OrdinalIgnoreCase))
+                    {
+                        AutoStartService.Set(true);
+                        Views.MainWindow.Log($"AutoStart self-heal: updated to \"{current}\"");
+                    }
+                }
+            }
+            catch (Exception ex) { Views.MainWindow.Log("AutoStart self-heal failed: " + ex.Message); }
+        }
 
         _hotKey = new GlobalHotKeyService();
         _hotKey.HotKeyPressed += OnHotKey;

@@ -6,7 +6,7 @@ namespace PlanKanban.Services;
 public static class AutoStartService
 {
     private const string RunKey = @"Software\Microsoft\Windows\CurrentVersion\Run";
-    private const string ValueName = "PlanKanban";
+    internal const string ValueName = "PlanKanban";
 
     public static bool IsEnabled()
     {
