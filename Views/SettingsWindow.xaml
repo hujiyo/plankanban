@@ -60,8 +60,11 @@
             <ComboBox x:Name="MonitorCombo" Style="{StaticResource InputComboBox}" Margin="0,0,0,14" Width="280" HorizontalAlignment="Left"
                       SelectionChanged="MonitorCombo_SelectionChanged"/>
 
-            <CheckBox x:Name="AutoStartBox" Content="开机自启动" Margin="0,0,0,16"
+            <CheckBox x:Name="AutoStartBox" Content="开机自启动" Margin="0,0,0,12"
                       Checked="AutoStartBox_Changed" Unchecked="AutoStartBox_Changed"/>
+
+            <CheckBox x:Name="RequireClickBox" Content="开启防误触（边缘悬停仅高亮，需点击才呼出）"
+                      Margin="0,0,0,16" ToolTip="勾选后鼠标贴边只显示触发条高亮，需要再点击一下才会展开看板；快捷键不受影响"/>
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Content="应用" Style="{StaticResource AccentButtonStyle}" Padding="16,6" Margin="0,0,8,0" Click="Apply_Click"/>

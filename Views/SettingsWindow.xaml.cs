@@ -43,6 +43,7 @@ public partial class SettingsWindow : Window
         _pendingHotKey = _settings.HotKey;
         HotKeyBox.Text = _pendingHotKey;
         AutoStartBox.IsChecked = AutoStartService.IsEnabled();
+        RequireClickBox.IsChecked = _settings.RequireClickToExpand;
         BuildMonitorCombo();
         UpdateLabels();
         _suspendEvents = false;
@@ -143,6 +144,7 @@ public partial class SettingsWindow : Window
         _settings.EdgeTriggerDelayMs = (int)TriggerDelay.Value;
         _settings.AutoHideDelayMs = (int)AutoHideDelay.Value;
         _settings.PanelWidth = (int)PanelWidth.Value;
+        _settings.RequireClickToExpand = RequireClickBox.IsChecked == true;
 
         if (!string.IsNullOrEmpty(_pendingHotKey))
             _settings.HotKey = _pendingHotKey;

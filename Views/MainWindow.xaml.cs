@@ -141,6 +141,14 @@ public void ResetStateAfterModal()
 
     public void Toggle() { if (_expanded) Collapse(); else Expand(); }
 
+    /// <summary>防误触模式下：边缘触变后仅高亮触发条，等待用户点击再展开。</summary>
+    public void PrimeTriggerBar()
+    {
+        if (_expanded) return;
+        TriggerBar.Opacity = 1.0;
+        TriggerBar.Background = TryFindBrush("TriggerBarHotBrush");
+    }
+
     public void Expand()
     {
         if (_expanded) return;
@@ -344,7 +352,7 @@ public void ResetStateAfterModal()
         _hoverTrigger = true;
         TriggerBar.Opacity = 1.0;
         TriggerBar.Background = (Brush)Application.Current.FindResource("TriggerBarHotBrush");
-        if (!_expanded) Expand();
+        if (!_expanded && !Settings.RequireClickToExpand) Expand();
     }
 
     private void TriggerBar_MouseLeave(object sender, MouseEventArgs e)

@@ -15,5 +15,6 @@ public sealed class AppSettings
     public int PanelMaxHeight { get; set; } = 720;   // Top 边缘停靠时的最大高度
     public ThemeMode Theme { get; set; } = ThemeMode.System;
     public bool AutoStart { get; set; } = false;
+    public bool RequireClickToExpand { get; set; } = false;   // 防误触：边缘悬停仅高亮，需点击才呼出
     public string? ScreenDeviceName { get; set; }    // null 表示跟随鼠标所在屏幕
 }

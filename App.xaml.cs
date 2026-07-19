@@ -70,7 +70,11 @@ public partial class App : Application
         _main.Show();
 
         _edge = new EdgeDetector { Settings = _data.Settings };
-        _edge.EdgeHit += () => Dispatcher.Invoke(() => _main.Expand());
+        _edge.EdgeHit += () => Dispatcher.Invoke(() =>
+        {
+            if (_data.Settings.RequireClickToExpand) _main.PrimeTriggerBar();
+            else _main.Expand();
+        });
         _edge.Start();
 
         _main.Closed += (_, _) => { if (!_exiting) ShutdownImpl(quit: false); };
