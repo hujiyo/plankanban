@@ -144,7 +144,7 @@ public partial class App : Application
 
     public void OpenSettings()
     {
-        Views.MainWindow.Log($"OpenSettings: before, expanded={_main.IsExpanded}, animating={_main.IsAnimating}");
+        Views.MainWindow.Log($"OpenSettings: before, expanded={_main.IsExpanded}");
         _edge.Stop();   // 设置窗打开期间暂停边缘检测，避免与异步 Visibility 切换产生 race
         var win = new SettingsWindow
         {
@@ -164,7 +164,7 @@ public partial class App : Application
         // 设置窗关闭后做一次强制复位，避免因模态消息循环导致动画/可见性状态错乱
         win.Closed += (_, _) =>
         {
-            Views.MainWindow.Log($"OpenSettings: closed, expanded={_main.IsExpanded}, animating={_main.IsAnimating}");
+            Views.MainWindow.Log($"OpenSettings: closed, expanded={_main.IsExpanded}");
             _main.ResetStateAfterModal();
             _edge.Start();   // 重新启用边缘检测
         };

@@ -3,7 +3,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using PlanKanban.Models;
 using PlanKanban.ViewModels;
@@ -20,13 +19,10 @@ public partial class MainWindow : Window
     public AppSettings Settings { get; set; } = new();
     public event Action<IntPtr>? HwndReady;
     public bool IsExpanded => _expanded;
-    public bool IsAnimating => _animating;
 
     private bool _expanded;
-    private bool _animating;
     private bool _hoverSelf;       // 鼠标在面板上
     private bool _hoverTrigger;   // 鼠标在触发条上
-    private long _collapseSeq;     // 收起序号，用于丢弃过期的异步 Visibility 切换
     private readonly DispatcherTimer _autoHide;
 
     public MainWindow()
@@ -70,34 +66,32 @@ public partial class MainWindow : Window
         // 临时诊断：默认展开，确认窗口本身可见
         _expanded = true;
         Panel.Visibility = Visibility.Visible;
-        AnimatePanel(collapsed: false, animate: false);
+        AnimatePanel(collapsed: false);
     }
 
     public void OnSettingsChanged()
     {
         _autoHide.Interval = TimeSpan.FromMilliseconds(Settings.AutoHideDelayMs);
         UpdatePlacement();
-        if (_expanded) { Panel.Visibility = Visibility.Visible; AnimatePanel(collapsed: false, animate: false); }
-        else { Panel.Visibility = Visibility.Collapsed; AnimatePanel(collapsed: true, animate: false); }
+        if (_expanded) { Panel.Visibility = Visibility.Visible; AnimatePanel(collapsed: false); }
+        else { Panel.Visibility = Visibility.Collapsed; AnimatePanel(collapsed: true); }
     }
 
-/// <summary>设置窗（模态）关闭后调用，强制复位动画/可见性状态，
-    /// 防止因模态消息循环中 EdgeDetector 触发的 Expand/Collapse 与
-    /// 异步 Background 派发的 Visibility 切换产生 race 导致看板锁死。</summary>
-public void ResetStateAfterModal()
-{
-    _animating = false;          // 强制解锁动画锁
-    _autoHide.Stop();            // 取消任何待触发的自动收起
+    /// <summary>设置窗（模态）关闭后调用，按当前 _expanded 重新校正可见性，
+    /// 保证与设置窗打开期间边缘检测触发的状态变化保持一致。</summary>
+    public void ResetStateAfterModal()
+    {
+        _autoHide.Stop();            // 取消任何待触发的自动收起
     // 按 _expanded 重新校正可见性与 transform，保证一致
     if (_expanded)
     {
         Panel.Visibility = Visibility.Visible;
-        AnimatePanel(collapsed: false, animate: false);
+        AnimatePanel(collapsed: false);
     }
     else
     {
         Panel.Visibility = Visibility.Collapsed;
-        AnimatePanel(collapsed: true, animate: false);
+        AnimatePanel(collapsed: true);
     }
 }
 
@@ -153,9 +147,8 @@ public void ResetStateAfterModal()
     {
         if (_expanded) return;
         _expanded = true;
-        _collapseSeq++;   // 使任何挂起的延迟收起回调失效
         Panel.Visibility = Visibility.Visible;
-        AnimatePanel(collapsed: false, animate: false);   // 瞬间到位
+        AnimatePanel(collapsed: false);
         TriggerBar.Opacity = 0.7;
         TriggerBar.Background = TryFindBrush("TriggerBarHotBrush");
         Dispatcher.BeginInvoke(new Action(() =>
@@ -169,8 +162,7 @@ public void ResetStateAfterModal()
         if (!_expanded) return;
         _expanded = false;
         _autoHide.Stop();
-        _collapseSeq++;
-        AnimatePanel(collapsed: true, animate: false);   // 瞬间到位
+        AnimatePanel(collapsed: true);
         TriggerBar.Opacity = 0.55;
         TriggerBar.Background = TryFindBrush("TriggerBarBrush");
         try { Keyboard.ClearFocus(); } catch { }
@@ -189,7 +181,7 @@ public void ResetStateAfterModal()
 
     public void ForceClose() => Close();
 
-    private void AnimatePanel(bool collapsed, bool animate)
+    private void AnimatePanel(bool collapsed)
     {
         double targetX = 0, targetY = 0;
         switch (Settings.Edge)
@@ -199,59 +191,8 @@ public void ResetStateAfterModal()
             case DockEdge.Top:   targetY = collapsed ? -Height : 0; break;
         }
 
-        // 先停掉旧动画，避免 HoldEnd 锁住属性
-        PanelTransform.BeginAnimation(System.Windows.Media.TranslateTransform.XProperty, null);
-        PanelTransform.BeginAnimation(System.Windows.Media.TranslateTransform.YProperty, null);
-
-        if (!animate)
-        {
-            PanelTransform.X = targetX;
-            PanelTransform.Y = targetY;
-            return;
-        }
-
-        _animating = true;
-        var dur = TimeSpan.FromMilliseconds(220);
-        var ease = new CubicEase { EasingMode = EasingMode.EaseOut };
-
-        if (targetX != PanelTransform.X)
-        {
-            var ax = new DoubleAnimation(PanelTransform.X, targetX, dur)
-            {
-                EasingFunction = ease,
-                FillBehavior = FillBehavior.Stop
-            };
-            ax.Completed += (_, _) =>
-            {
-                PanelTransform.X = targetX;
-                _animating = false;
-            };
-            PanelTransform.BeginAnimation(System.Windows.Media.TranslateTransform.XProperty, ax);
-        }
-        if (targetY != PanelTransform.Y)
-        {
-            var ay = new DoubleAnimation(PanelTransform.Y, targetY, dur)
-            {
-                EasingFunction = ease,
-                FillBehavior = FillBehavior.Stop
-            };
-            ay.Completed += (_, _) =>
-            {
-                PanelTransform.Y = targetY;
-                _animating = false;
-            };
-            PanelTransform.BeginAnimation(System.Windows.Media.TranslateTransform.YProperty, ay);
-        }
-        // 兜底：强制复位
-        var guard = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(260) };
-        guard.Tick += (_, _) =>
-        {
-            guard.Stop();
-            PanelTransform.X = targetX;
-            PanelTransform.Y = targetY;
-            _animating = false;
-        };
-        guard.Start();
+        PanelTransform.X = targetX;
+        PanelTransform.Y = targetY;
     }
 
     /// <summary>根据贴靠边缘和当前屏幕，重新设置窗口位置与尺寸。</summary>

@@ -5,7 +5,7 @@ using Forms = System.Windows.Forms;
 
 namespace PlanKanban.Services;
 
-/// <summary>边缘悬停检测：低频定时器（默认 ~30Hz）轮询鼠标位置，
+/// <summary>边缘悬停检测：低频定时器（默认 16ms ~60Hz）轮询鼠标位置，
 /// 命中边缘后持续 EdgeTriggerDelayMs 才触发，避免误触。
 /// 离开边缘后自动复位。</summary>
 public sealed class EdgeDetector : IDisposable
