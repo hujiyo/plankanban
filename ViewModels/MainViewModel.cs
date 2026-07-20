@@ -17,25 +17,25 @@ public sealed class MainViewModel : ViewModelBase
     public AppSettings Settings => _data.Settings;
     public event Action? StatsChanged;
 
-    public Guid? CurrentGoalId
+    public GoalItem? CurrentGoal => Goals.FirstOrDefault(g => !g.IsDone);
+
+    public bool HasCurrentGoal => CurrentGoal != null;
+
+    private void SyncCurrentFlags()
     {
-        get => _data.CurrentGoalId;
-        set
+        var cur = CurrentGoal;
+        foreach (var g in Goals)
         {
-            if (_data.CurrentGoalId != value)
-            {
-                _data.CurrentGoalId = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(CurrentGoal));
-                OnPropertyChanged(nameof(HasCurrentGoal));
-                ScheduleSave();
-            }
+            g.IsCurrent = (g == cur);
         }
     }
 
-    public GoalItem? CurrentGoal => Goals.FirstOrDefault(g => g.Id == CurrentGoalId);
-
-    public bool HasCurrentGoal => CurrentGoal != null;
+    private void EmitDerivedProps()
+    {
+        OnPropertyChanged(nameof(CurrentGoal));
+        OnPropertyChanged(nameof(HasCurrentGoal));
+        SyncCurrentFlags();
+    }
 
     public string NewGoalText
     {
@@ -51,14 +51,24 @@ public sealed class MainViewModel : ViewModelBase
         History = new ObservableCollection<GoalItem>(data.History ?? new());
         Archive = new ObservableCollection<GoalItem>(data.Archive ?? new());
         foreach (var g in Goals) { g.PropertyChanged += OnGoalChanged; }
-        Goals.CollectionChanged += (_, _) => { ScheduleSave(); StatsChanged?.Invoke(); };
+        SyncCurrentFlags();
+        Goals.CollectionChanged += (_, _) =>
+        {
+            ScheduleSave();
+            StatsChanged?.Invoke();
+            EmitDerivedProps();
+        };
         Archive.CollectionChanged += (_, _) => { ScheduleSave(); StatsChanged?.Invoke(); };
     }
 
     private void OnGoalChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
         if (e.PropertyName != nameof(GoalItem.IsEditing)) ScheduleSave();
-        if (e.PropertyName == nameof(GoalItem.IsDone)) StatsChanged?.Invoke();
+        if (e.PropertyName == nameof(GoalItem.IsDone))
+        {
+            StatsChanged?.Invoke();
+            EmitDerivedProps();
+        }
         if (e.PropertyName == nameof(GoalItem.Title) && sender is GoalItem g && g == CurrentGoal)
             OnPropertyChanged(nameof(CurrentGoal));
     }
@@ -101,7 +111,6 @@ public sealed class MainViewModel : ViewModelBase
     {
         if (p is GoalItem g)
         {
-            if (g.Id == CurrentGoalId) CurrentGoalId = null;
             g.PropertyChanged -= OnGoalChanged;
             Goals.Remove(g);
             // 移入历史，保留可恢复
@@ -134,10 +143,13 @@ public sealed class MainViewModel : ViewModelBase
         if (p is GoalItem g) g.IsDone = !g.IsDone;
     });
 
-    public ICommand SetCurrentGoalCommand => new RelayCommand(p =>
+    public ICommand PinToTopCommand => new RelayCommand(p =>
     {
-        if (p is GoalItem g) CurrentGoalId = g.Id;
-        else CurrentGoalId = null;
+        if (p is GoalItem g)
+        {
+            int i = Goals.IndexOf(g);
+            if (i > 0) { Goals.Move(i, 0); ScheduleSave(); }
+        }
     });
 
     public ICommand StartEditCommand => new RelayCommand(p =>
@@ -155,7 +167,6 @@ public sealed class MainViewModel : ViewModelBase
         var done = Goals.Where(x => x.IsDone).ToList();
         foreach (var d in done)
         {
-            if (d.Id == CurrentGoalId) CurrentGoalId = null;
             d.PropertyChanged -= OnGoalChanged;
             Goals.Remove(d);
             // 固化完成时间戳

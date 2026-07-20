@@ -47,11 +47,10 @@
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>   <!-- 0. 顶部 -->
-                    <RowDefinition Height="Auto"/>   <!-- 1. 当前目标卡片 -->
-                    <RowDefinition Height="*"/>      <!-- 2. 列表 -->
-                    <RowDefinition Height="Auto"/>   <!-- 3. 输入区 -->
-                    <RowDefinition Height="Auto"/>   <!-- 4. 底栏 -->
-                    <RowDefinition Height="Auto"/>   <!-- 5. 归档折叠区 -->
+                    <RowDefinition Height="*"/>      <!-- 1. 列表 -->
+                    <RowDefinition Height="Auto"/>   <!-- 2. 输入区 -->
+                    <RowDefinition Height="Auto"/>   <!-- 3. 底栏 -->
+                    <RowDefinition Height="Auto"/>   <!-- 4. 归档折叠区 -->
                 </Grid.RowDefinitions>
 
                 <!-- 1. 顶部品牌区 -->
@@ -90,37 +89,8 @@
                     </StackPanel>
                 </Grid>
 
-                <!-- 2. 当前目标卡片 -->
-                <Border x:Name="CurrentCard" Grid.Row="1" Margin="18,16,18,4"
-                        CornerRadius="12" Padding="18,16"
-                        BorderThickness="1.5" BorderBrush="{DynamicResource CurrentCardBorder}"
-                        Visibility="{Binding HasCurrentGoal, Converter={x:Static vm:BooleanToVisibilityConverter.Instance}}">
-                    <Border.Background>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                            <GradientStop Offset="0" Color="{DynamicResource CurrentCardBgColor}"/>
-                            <GradientStop Offset="1" Color="{DynamicResource PanelInnerBgColor}"/>
-                        </LinearGradientBrush>
-                    </Border.Background>
-                    <Grid DataContext="{Binding CurrentGoal}">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                            <Border Width="6" Height="6" CornerRadius="3" Background="{DynamicResource AccentBrush}"
-                                    Margin="0,0,7,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="当前目标" FontSize="10.5" FontWeight="SemiBold"
-                                       Foreground="{DynamicResource AccentBrush}"
-                                       Margin="0,0,10,0" VerticalAlignment="Center"/>
-                        </StackPanel>
-                        <TextBlock Grid.Row="1" Text="{Binding Title}" TextWrapping="Wrap"
-                                   FontSize="17" FontWeight="SemiBold" LineHeight="24"
-                                   Style="{StaticResource RowTextStyle}"/>
-                    </Grid>
-                </Border>
-
-                <!-- 2. 列表 -->
-                <ScrollViewer Grid.Row="2" Margin="10,10,10,8"
+<!-- 2. 列表（“当前目标”即列表中第一项未完成项，行内加视觉强调） -->
+                <ScrollViewer Grid.Row="1" Margin="10,14,10,8"
                               VerticalScrollBarVisibility="Auto"
                               HorizontalScrollBarVisibility="Disabled"
                               PreviewMouseWheel="List_PreviewMouseWheel">
@@ -138,9 +108,22 @@
                             <DataTemplate>
                                 <Border x:Name="row" Background="Transparent"
                                         CornerRadius="9" Margin="2,1.5" Padding="10,9"
+                                        BorderThickness="1.5"
                                         MouseLeftButtonDown="GoalRow_MouseDown"
                                         MouseEnter="GoalRow_MouseEnter"
-                                        MouseLeave="GoalRow_MouseLeave" Cursor="Hand">
+                                        MouseLeave="GoalRow_MouseLeave" Cursor="Arrow"
+                                        ToolTip="双击置顶为当前目标">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="BorderBrush" Value="Transparent"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                                                    <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                                                    <Setter Property="Background" Value="{DynamicResource CurrentCardBg}"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto"/>
@@ -160,9 +143,13 @@
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock" BasedOn="{StaticResource RowTextStyle}">
                                                         <Setter Property="Visibility" Value="Visible"/>
+                                                        <Setter Property="FontWeight" Value="Normal"/>
                                                         <Style.Triggers>
                                                             <DataTrigger Binding="{Binding IsEditing}" Value="True">
                                                                 <Setter Property="Visibility" Value="Collapsed"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                                                                <Setter Property="FontWeight" Value="SemiBold"/>
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>
@@ -216,7 +203,7 @@
                 </ScrollViewer>
 
                 <!-- 3. 输入区（放底部，方便快速追加） -->
-                <Grid Grid.Row="3" Margin="18,4,18,8">
+                <Grid Grid.Row="2" Margin="18,4,18,8">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
@@ -230,7 +217,7 @@
                 </Grid>
 
                 <!-- 4. 底栏 -->
-                <Border Grid.Row="4" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource DividerBrush}"
+                <Border Grid.Row="3" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource DividerBrush}"
                         Background="{DynamicResource TopbarBg}">
                     <Grid Margin="18,10,18,12">
                         <Grid.ColumnDefinitions>
@@ -257,7 +244,7 @@
                 </Border>
 
                 <!-- 6. 归档折叠区 -->
-                <Border x:Name="HistoryPanel" Grid.Row="5" Height="0" ClipToBounds="True"
+                <Border x:Name="HistoryPanel" Grid.Row="4" Height="0" ClipToBounds="True"
                         Background="{DynamicResource PanelInnerBg}">
                     <StackPanel Margin="18,12,18,14" MaxHeight="280">
                         <Grid Margin="0,0,0,8">

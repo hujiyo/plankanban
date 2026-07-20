@@ -424,11 +424,12 @@ public partial class MainWindow : Window
     private void GoalRow_MouseDown(object sender, MouseButtonEventArgs e)
     {
         if (e.ChangedButton != MouseButton.Left) return;
-        if (sender is FrameworkElement fe && fe.DataContext is GoalItem g)
+        if (e.ClickCount >= 2 && sender is FrameworkElement fe && fe.DataContext is GoalItem g)
         {
             if (DataContext is MainViewModel vm)
             {
-                vm.SetCurrentGoalCommand.Execute(g);
+                vm.PinToTopCommand.Execute(g);
+                e.Handled = true;
             }
         }
     }

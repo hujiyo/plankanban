@@ -55,6 +55,14 @@ public sealed class GoalItem : INotifyPropertyChanged
         set { if (_isEditing != value) { _isEditing = value; OnPropertyChanged(); } }
     }
 
+    private bool _isCurrent;
+    [JsonIgnore]
+    public bool IsCurrent
+    {
+        get => _isCurrent;
+        set { if (_isCurrent != value) { _isCurrent = value; OnPropertyChanged(); } }
+    }
+
     [JsonIgnore]
     public string ArchivedAtText => ArchivedAt.HasValue
         ? ArchivedAt.Value.ToLocalTime().ToString("yyyy-MM-dd HH:mm")

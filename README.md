@@ -28,11 +28,11 @@
 | 删除目标 | 鼠标悬停某行 → 右侧 ✕ |
 | 重命名 | 鼠标悬停某行 → ✏，回车提交 / Esc 取消 |
 | 勾选完成 | 行首勾选框 |
-| 设为当前目标 | 单击该行 |
+| 设为当前目标 | **双击**该行即置顶为“当前目标” |
 | 调整顺序 | 鼠标悬停某行 → ↑ / ↓ |
 | 清除已完成 | 面板底部"清除已完成"按钮 |
 
-"当前目标"会以高亮卡片置顶显示，字号更大、带主题强调色边框。
+"当前目标"由列表顺序与完成状态自动派生：列表中**最靠近顶端且未完成**的那一项即为当前目标，会在面板顶部以高亮卡片显示（字号更大、带主题强调色边框）。要更换当前目标，请通过 ↑/↓ 调整顺序，或**双击**某行将其置顶。把当前目标勾选完成后，它会原地变灰保留，下一个未完成的项自动顶上来成为新的"当前目标"，无需手动切换。
 
 ---
 
@@ -143,7 +143,7 @@ PlanKanban/
 │   └── GoalItem.cs        # 目标实体（INotifyPropertyChanged）
 ├── Services/
 │   ├── JsonDataStore.cs   # JSON 持久化（%AppData%\PlanKanban\data.json）
-│   ├── AppData.cs         # 数据容器（Goals + CurrentGoalId + Settings）
+│   ├── AppData.cs         # 数据容器（Goals + Settings；CurrentGoal 由顺序派生）
 │   ├── DebouncedSaver.cs  # 防抖写盘，避免高频 IO
 │   ├── EdgeDetector.cs    # 边缘悬停检测（DispatcherTimer 轮询鼠标位置，默认 16ms ~60Hz）
 │   ├── GlobalHotKeyService.cs  # RegisterHotKey + 隐藏窗口 WndProc
@@ -190,7 +190,7 @@ PlanKanban/
 - **避免事件泄漏**：删除目标时主动 `-= PropertyChanged`。
 
 ### 6. 数据持久化
-`%AppData%\PlanKanban\data.json` 包含 `Goals / CurrentGoalId / Settings` 三段。
+`%AppData%\PlanKanban\data.json` 包含 `Goals / Settings` 两段（"当前目标"由列表顺序与完成状态派生，不再单独保存）。
 启动时一次性读入内存，运行时全在内存操作，写盘经防抖；程序崩溃/重启时上次成功保存的状态可恢复。
 
 ### 7. 主题
